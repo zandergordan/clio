@@ -1,4 +1,5 @@
 import sys
+import time
 import mido
 
 from pymata4 import pymata4
@@ -11,6 +12,7 @@ Note on messages turn on the pin, likewise for note offs.
 # some globals
 DIGITAL_PIN = 6  # arduino pin number
 
+
 def blink(my_board, pin):
     """
     This function will toggle a digital pin.
@@ -22,15 +24,17 @@ def blink(my_board, pin):
     my_board.set_pin_mode_digital_output(pin)
 
     # open a MIDI port and control the LED
-    with mido.open_input('New Port', virtual=True) as inport:
-        for message in inport:
-            print(message)
-            if message.type == 'note_on':
-                my_board.digital_write(pin, 1)
-            elif message.type == 'note_off':
-                my_board.digital_write(pin, 0)
-            else:
-                pass
+    clio_port = mido.open_input('Clio', virtual=True)
+    while True:
+        message = clio_port.receive()
+        print(message)
+        if message.type == 'note_on':
+            my_board.digital_write(pin, 1)
+        elif message.type == 'note_off':
+            my_board.digital_write(pin, 0)
+        else:
+            pass
+
 
 
 board = pymata4.Pymata4()
